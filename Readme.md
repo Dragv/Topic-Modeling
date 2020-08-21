@@ -11,7 +11,7 @@ flask run
 Afterwards, send a `POST` request to the `http://localhost:5000/send` with body the following body template:
 ```json
 {
-	"text": /* Text to be analized */
+	"text": "Text to be analized"
 }
 ```
 
