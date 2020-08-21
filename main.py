@@ -44,41 +44,41 @@ def prepareText(text):
     return tokens
 
 def StringToCSV(text):
-    return text.split('\. ')
+    return text.split('. ')
 
 from gensim import corpora
-
-
-from flask import Flask, request, jsonify
-app = Flask(__name__)
-
-@app.route('/send', methods=['POST'])
-def hello_world():
-    request.form('text')
-    return 'Hello, World!'
-
 import random
-if __name__ == "__main__":
-    text_data = []
-    with open('dataset.csv') as f:
-        for line in f:
-            tokens = prepareText(line)
-            if random.random() > .99:
-                text_data.append(tokens)
 
-    print(text_data)
+def ProcessData(text):
+    text_data = []
+    for line in text:
+        tokens = prepareText(line)
+        if random.random() > .99:
+            text_data.append(tokens)
+
     dictionary = corpora.Dictionary(text_data)
     corpus = [dictionary.doc2bow(text) for text in text_data]
-
-    import pickle
-    pickle.dump(corpus, open('corpus.pkl', 'wb'))
-    dictionary.save('dictionary.gensim')
 
     import gensim
     NUM_TOPICS = 5
     ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics = NUM_TOPICS, id2word = dictionary, passes = 15)
     topics = ldamodel.print_topics(num_words = 4)
+
+    stringTopics = ''
     for topic in topics:
-        print(topic)
+        stringTopics += topic[1] + '\n'
+
+    return stringTopics
+
+from flask import Flask, request, jsonify
+app = Flask(__name__)
+
+@app.route('/send', methods=['POST'])
+def send_data():
+    textString = request.form['text']
+    processedText = StringToCSV(textString)
+    return ProcessData(processedText)
+
+if __name__ == "__main__":
 
     app.run()
